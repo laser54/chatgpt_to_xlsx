@@ -14,7 +14,7 @@ pip install -r requirements.txt
 Save your OpenAI API key in a file called .env in the root directory of this project. The file should contain a single line with the following format:
 Copy code
 ```
-API_KEY=your-api-key-here
+API_KEY="your-api-key-here"
 ```
 Create an input file called input.txt in the root directory of this project. This file should contain a list of questions, with one question per line.
 

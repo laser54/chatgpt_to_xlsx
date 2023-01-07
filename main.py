@@ -53,16 +53,17 @@ for question in questions:
         print('SOMETHING WRONG WITH .... ' + question)
     results.append([question, result])
 
-# Open the Excel file in write mode and create a new worksheet
-wb = openpyxl.Workbook()
-ws = wb.active
+    # Open the Excel file in write mode and create a new worksheet
+    wb = openpyxl.load_workbook('results.xlsx')
+    ws = wb.active
 
-# Iterate over the results and write each row to the worksheet
-for row in results:
-    ws.append(row)
+    # Append the new result to the worksheet
+    ws.append([question, result])
 
-# Save the Excel file
-wb.save('results.xlsx')
+    # Save the Excel file
+    wb.save('results.xlsx')
+
+print("Done")
 
 
 
