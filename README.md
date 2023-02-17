@@ -26,3 +26,4 @@ python main.py
 ```
 The script will read in the list of questions from the input file, generate responses for each question using the OpenAI API, and write the results to an Excel file called results.xlsx.
 You can add additional prompts before calling the program. You can enter multiple prompts, with each prompt being linked to each keyword and added to the final file separately.
+So you can check different prompts to one keyword to choose the best one.
