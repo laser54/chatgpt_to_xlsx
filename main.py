@@ -2,13 +2,14 @@ import openai
 import json
 import openpyxl
 import os
-
 from dotenv import load_dotenv
+from tqdm import tqdm
+
 load_dotenv()
 
 openai.api_key = os.getenv('API_KEY')
 
-def get_answer(question, extra_prompt):
+def generate_response(question, extra_prompt):
     """
     Use the OpenAI API to generate a response to a question.
 
@@ -36,47 +37,48 @@ def get_answer(question, extra_prompt):
 
         json_string = json.dumps(response)
         data = json.loads(json_string)
-        return data["choices"][0]["text"]
+        return data["choices"][0]["text"].lstrip()
     except Exception as e:
+        print(f"Error generating response for '{question}': {e}")
         return "ERROR"
 
+def main():
+    # Read the input file and get the questions
+    with open('input.txt', 'r') as input_file:
+        questions = input_file.readlines()
 
-with open('input.txt', 'r') as input_file:
-    questions = input_file.readlines()
+    # Ask user for extra prompts
+    extra_prompts = []
+    while True:
+        prompt = input("Enter an extra prompt (or type 'done' to continue): ")
+        if prompt == "done":
+            break
+        extra_prompts.append(prompt)
 
-# Ask user for extra prompts
-extra_prompts = []
-while True:
-    prompt = input("Enter an extra prompt (or type 'done' to continue): ")
-    if prompt == "done":
-        break
-    extra_prompts.append(prompt)
+    # Create an empty list to store the results
+    results = []
 
-# Create an empty list to store the results
-results = []
+    # Iterate over the questions and extra prompts, and call the generate_response() function for each combination
+    for i, question in enumerate(tqdm(questions, desc="Generating responses", total=len(questions))):
+        for extra_prompt in extra_prompts:
+            response = generate_response(question, extra_prompt)
+            results.append([extra_prompt, question.strip(), response])
 
-# Iterate over the questions and call the get_answer() function for each question with all the extra prompts, storing the results in the results list
-for question in questions:
-    for extra_prompt in extra_prompts:
-        result = get_answer(question.strip(), extra_prompt).lstrip()
-        if result != "ERROR":
-            print('parsing .... ' + question)
-        else:
-            print('SOMETHING WRONG WITH .... ' + question)
-        results.append([extra_prompt, question.strip(), result])
+    # Write the results to an Excel file
+    wb = openpyxl.Workbook()
+    ws = wb.active
 
-# Open the Excel file in write mode and create a new worksheet
-wb = openpyxl.Workbook()
-ws = wb.active
+    # Write the headers to the worksheet
+    ws.append(["Extra Prompt", "Keyword", "Result"])
 
-# Write the headers to the worksheet
-ws.append(["Extra Prompt", "Keyword", "Result"])
+    # Write the results to the worksheet
+    for result in results:
+        ws.append([result[0], result[1], result[2]])
 
-# Append the new results to the worksheet
-for result in results:
-    ws.append(result[0:2] + [result[2].strip()])
+    # Save the Excel file
+    wb.save('results.xlsx')
 
-# Save the Excel file
-wb.save('results.xlsx')
+    print("Done")
 
-print("Done")
+if __name__ == '__main__':
+    main()
