@@ -4,6 +4,7 @@ import openpyxl
 import os
 from dotenv import load_dotenv
 from tqdm import tqdm
+import time
 
 load_dotenv()
 
@@ -25,9 +26,9 @@ def generate_response(question, extra_prompt):
     """
     try:
         prompt = f'{extra_prompt}\n"{question.strip()}"'
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
             max_tokens=2048,
             temperature=0.5,
             top_p=1,
@@ -37,7 +38,8 @@ def generate_response(question, extra_prompt):
 
         json_string = json.dumps(response)
         data = json.loads(json_string)
-        return data["choices"][0]["text"].lstrip()
+        return data["choices"][0]["message"]["content"].lstrip()
+        time.sleep(4)
     except Exception as e:
         print(f"Error generating response for '{question}': {e}")
         return "ERROR"
